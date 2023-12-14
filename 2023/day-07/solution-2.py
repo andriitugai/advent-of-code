@@ -2,15 +2,30 @@ import functools
 from collections import defaultdict
 
 strength = {
-        '2': 1, '3': 2, '4': 3, '5': 4, '6': 5, '7': 6, '8': 7, 
-        '9': 8, 'T': 9, 'J': 10, 'Q': 11, 'K': 12, 'A': 13
+        '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, 
+        '9': 9, 'T': 10, 'J': 1, 'Q': 11, 'K': 12, 'A': 13
     }
+
+def replacements(hand: str):
+    if hand == "":
+        return [""]
+    return [
+        x + y
+        for x in ('23456789TQKA' if hand[0] == 'J' else hand[0])
+        for y in replacements(hand[1:])
+    ]
+
+def classify(hand):
+    return max(map(getType, replacements(hand)))
+
 
 def getType(hand: str) -> int:
     h = defaultdict(int)
     for c in hand :
         h[c] += 1
+
     v = sorted(h.values(), reverse=True)
+
     if v[0] == 1:
         return 1        # High card
     elif v[0] == 2:
@@ -28,7 +43,7 @@ def getType(hand: str) -> int:
 
 def compare(cards1: str, cards2: str) -> int:
     hand1, hand2 = cards1[0], cards2[0]
-    t1, t2 = getType(hand1), getType(hand2)
+    t1, t2 = classify(hand1), classify(hand2)
     if t1 < t2 :
         return -1
     elif t1 > t2:
